@@ -1,17 +1,37 @@
 body {
   margin: 0px;
   font-family: 'Open Sans', sans-serif;
+  font-size: 125%;
+}
+
+.container {
+  display: flex;
+  align-items: center;
 }
 
 .answerBar {
-  height: 20vh;
-  width: 40vw;
+  height: 30vh;
+  width: 30vw;
   background-color: #333333;
+  display: flex;
+  align-items: flex-end;
+}
+
+#navBar {
+  width: 10vw !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.result {
+  margin: 1.25vh 3.5vw;
+  font-size: 400%;
+  color: #ededed;
 }
 
 .row {
   display: flex;
-  /*justify-content: center;*/
   align-items: center;
 }
 
@@ -23,10 +43,6 @@ body {
   background-color: #ededed;
 }
 
-#specButton {
-  background-color: #aacbff !important;
-}
-
 .button {
   height: 7.5vw;
   width: 10vw;
@@ -35,13 +51,42 @@ body {
   justify-content: center;
   align-items: center;
   font-size: 175%;
+}
 
+.button:hover {
+  background-color: #aacbff;
 }
 
 .fatButton {
-
+  height: 9vw;
+  width: 40vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 175%;
 }
 
-.bottomRow {
+#specButton {
+  background-color: #aacbff !important;
+}
 
+#specButton:hover {
+  background-color: #2170ef !important;
+}
+
+#enter {
+  background-color: #44ff4b !important;
+}
+
+#enter:hover {
+  background-color: #29ad2e !important;
+}
+
+#dark {
+  background-color: #333333;
+  color: #ededed;
+}
+
+#dark:hover {
+  color: #2170ef;
 }
