@@ -1,5 +1,10 @@
 // simple JS without e36 classes
-var result = document.querySelector(".result");
+
+//bugs
+//2. reset size if justComputed and recompute
+//4. compute if directly to next operation
+//5. refresh buffers if calculate next and not on default viewport
+//6. sometimes excessively long buffers will cause overflow
 
 var currNum = "0";
 var number = "";
@@ -9,6 +14,11 @@ var hasOperation = false;
 var currNum2 = "";
 var justComputed = false;
 var currNumBuffer = "0";
+
+var lastLog = "";
+var timesLogged = 0;
+
+var bufferLog = "";
 
 const containerWidth = document.querySelector(".button").offsetWidth * 2;
 
@@ -41,6 +51,8 @@ this.addFunc = this.addFunc.bind(this);
 this.subFunc = this.subFunc.bind(this);
 this.divFunc = this.divFunc.bind(this);
 this.multFunc = this.multFunc.bind(this);
+this.upFunc = this.upFunc.bind(this);
+this.downFunc = this.downFunc.bind(this);
 
 function concatNum() {
   justComputed = false;
@@ -59,7 +71,7 @@ function concatNum() {
   console.log(currNum);
 }
 
-function switchFunc() { //doesnt work when i have done a result already
+function switchFunc() {
   if (!justComputed) {
     const currentRes = parseFloat(currNum);
     currNum = -currentRes;
@@ -80,7 +92,6 @@ function clearFunc() {
   hasOperation = false;
   document.querySelector(".result").textContent = currNum;
   document.querySelector(".result").style.fontSize = "80px";
-  //add functionality for history console
 }
 
 function compute() {
@@ -89,33 +100,76 @@ function compute() {
       const ultimate = parseFloat(currNum2) + parseFloat(currNum);
       currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
       document.querySelector(".result").textContent = ultimate;
-    } //IT DOESNT SHRINK IF I COMPUTE A FAT NUMBER WITH DECIMALS
+      while (document.querySelector(".result").offsetWidth > containerWidth) {
+        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+        newSize = (parseInt(newSize) * 0.8) + "px";
+        console.log(newSize);
+        document.querySelector(".result").style.fontSize = newSize;
+      }
+      lastLog = currNum2 + " + " + currNum + " = " + ultimate;
+    }
     if (currOp == ".subtract") {
       const ultimate = parseFloat(currNum2) - parseFloat(currNum);
       currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
       document.querySelector(".result").textContent = ultimate;
+      while (document.querySelector(".result").offsetWidth > containerWidth) {
+        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+        newSize = (parseInt(newSize) * 0.8) + "px";
+        console.log(newSize);
+        document.querySelector(".result").style.fontSize = newSize;
+      }
+      lastLog = currNum2 + " - " + currNum + " = " + ultimate;
     }
     if (currOp == ".divide") {
       const ultimate = parseFloat(currNum2) / parseFloat(currNum);
       currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
       document.querySelector(".result").textContent = ultimate;
+      while (document.querySelector(".result").offsetWidth > containerWidth) {
+        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+        newSize = (parseInt(newSize) * 0.8) + "px";
+        console.log(newSize);
+        document.querySelector(".result").style.fontSize = newSize;
+      }
+      lastLog = currNum2 + " ÷ " + currNum + " = " + ultimate;
     }
     if (currOp == ".multiply") {
       const ultimate = parseFloat(currNum2) * parseFloat(currNum);
       currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
       document.querySelector(".result").textContent = ultimate;
+      while (document.querySelector(".result").offsetWidth > containerWidth) {
+        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+        newSize = (parseInt(newSize) * 0.8) + "px";
+        console.log(newSize);
+        document.querySelector(".result").style.fontSize = newSize;
+      }
+      lastLog = currNum2 + " × " + currNum + " = " + ultimate;
     }
+
+    console.log(lastLog);
+
     document.querySelector(currOp).classList.remove("clicked");
+    const newBuff = document.createElement('div');
+    newBuff.classList.add('buffer');
+    newBuff.classList.add("h" + timesLogged);
+    newBuff.textContent = lastLog;
+    currBottom = timesLogged;
+    timesLogged += 1;
+    if (timesLogged > 3) {
+      const toHide = timesLogged - 4;
+      document.querySelector(".h" + toHide).classList.add('inactive'); //find another way to select without numbers
+    }
+    document.querySelector(".answerBar").insertBefore(newBuff, document.querySelector(".result"));
     justComputed = true;
   }
   else {
-    document.querySelector(".result").textContent = parseFloat(currNum);
+    if (!justComputed) currNumBuffer = currNum;
+    document.querySelector(".result").textContent = parseFloat(currNumBuffer);
+    justComputed = true;
   }
   currNum = "0";
   number = "";
   currOp = "";
-  hasOperation = false;
-  //buggy, for some reason a call to this.clearFunc doesn't work
+  hasOperation = false; //buggy, for some reason a call to this.clearFunc doesn't work
 }
 
 function addFunc() {
@@ -178,6 +232,23 @@ function multFunc() {
   }
 }
 
+function upFunc() {
+  if (currBottom > 2) {
+    document.querySelector(".h" + (currBottom)).classList.add('inactive');
+    document.querySelector(".h" + (currBottom - 3)).classList.remove('inactive');
+    currBottom = currBottom - 1;
+    console.log(currBottom);
+  }
+}
+
+function downFunc() {
+  if (timesLogged > 3 && currBottom < timesLogged - 1) {
+    document.querySelector(".h" + (currBottom - 2)).classList.add('inactive');
+    document.querySelector(".h" + (currBottom + 1)).classList.remove('inactive');
+    currBottom = currBottom + 1;
+  }
+}
+
 nine.addEventListener('click', function() {number = "9";});
 nine.addEventListener('click', this.concatNum);
 
@@ -231,3 +302,7 @@ sub.addEventListener('click', this.subFunc);
 div.addEventListener('click', this.divFunc);
 
 mult.addEventListener('click', this.multFunc);
+
+up.addEventListener('click', this.upFunc);
+
+down.addEventListener('click', this.downFunc);
