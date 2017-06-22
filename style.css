@@ -73,10 +73,14 @@ body {
 }
 
 #specButton {
-  background-color: #aacbff !important;
+  background-color: #aacbff;
 }
 
 #specButton:hover {
+  background-color: #2170ef;
+}
+
+.clicked {
   background-color: #2170ef !important;
 }
 
