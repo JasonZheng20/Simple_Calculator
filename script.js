@@ -3,6 +3,7 @@
 //bugs
 //5. refresh buffers may bug out on clear, may exceed space
 //if i do any thing and input new number, it might overflow or clear, since those reset the sizes
+//need to be able to switch computation
 
 /* ----------------------------------------------------------Global Variables */
 var currNum = "0";
@@ -168,6 +169,9 @@ function addBuffer() {
       document.querySelector(".h" + i).classList.add('inactive');
     }
   }
+  document.querySelector(".down").classList.add('hidden');
+  document.querySelector(".down").textContent = "";
+  down.removeEventListener('click', this.downFunc);
   document.querySelector(currOp).classList.remove("clicked");
   const newBuff = document.createElement('div');
   newBuff.classList.add('buffer');
@@ -203,11 +207,12 @@ function addFunc() {
     }
     currNum = "0";
   }
-  else {
-    pureCompute();
+  else if (!justComputed){
     document.querySelector(currOp).classList.remove("clicked");
-    currNum2 = currNumBuffer;
     currOp = ".add";
+    document.querySelector(".add").classList.add("clicked");
+    pureCompute();
+    currNum2 = currNumBuffer;
     hasOperation = true;
     currNum = "0";
     addBuffer();
@@ -227,11 +232,12 @@ function subFunc() {
     }
     currNum = "0";
   }
-  else {
-    pureCompute();
+  else if (!justComputed){
     document.querySelector(currOp).classList.remove("clicked");
-    currNum2 = currNumBuffer;
     currOp = ".subtract";
+    document.querySelector(".subtract").classList.add("clicked");
+    pureCompute();
+    currNum2 = currNumBuffer;
     hasOperation = true;
     currNum = "0";
     addBuffer();
@@ -251,11 +257,12 @@ function divFunc() {
     }
     currNum = "0";
   }
-  else {
-    pureCompute();
+  else if (!justComputed){
     document.querySelector(currOp).classList.remove("clicked");
-    currNum2 = currNumBuffer;
     currOp = ".divide";
+    document.querySelector(".divide").classList.add("clicked");
+    pureCompute();
+    currNum2 = currNumBuffer;
     hasOperation = true;
     currNum = "0";
     addBuffer();
@@ -275,11 +282,12 @@ function multFunc() {
     }
     currNum = "0";
   }
-  else {
-    pureCompute();
+  else if (!justComputed){
     document.querySelector(currOp).classList.remove("clicked");
-    currNum2 = currNumBuffer;
     currOp = ".multiply";
+    document.querySelector(".multiply").classList.add("clicked");
+    pureCompute();
+    currNum2 = currNumBuffer;
     hasOperation = true;
     currNum = "0";
     addBuffer();
@@ -414,7 +422,7 @@ dec.addEventListener('click', function() {
     number = "";
   }
   });
-  
+
 dec.addEventListener('click', this.concatNum);
 
 sign.addEventListener('click', this.switchFunc);
