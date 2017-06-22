@@ -1,26 +1,23 @@
 // simple JS without e36 classes
 
 //bugs
-//2. reset size if justComputed and recompute
-//4. compute if directly to next operation
-//5. refresh buffers if calculate next and not on default viewport
+//5. refresh buffers may bug out on clear, may exceed space
 //6. sometimes excessively long buffers will cause overflow
 
+/* ----------------------------------------------------------Global Variables */
 var currNum = "0";
 var number = "";
 var currOp = "";
 var hasOperation = false;
-
 var currNum2 = "";
 var justComputed = false;
 var currNumBuffer = "0";
-
 var lastLog = "";
 var timesLogged = 0;
-
 var bufferLog = "";
 
 const containerWidth = document.querySelector(".button").offsetWidth * 2;
+const bufferHeight = containerWidth / 4;
 
 const nine = document.querySelector(".nine");
 const eight = document.querySelector(".eight");
@@ -45,6 +42,7 @@ const down = document.querySelector(".down");
 
 this.concatNum = this.concatNum.bind(this);
 this.switchFunc = this.switchFunc.bind(this);
+this.pureCompute = this.pureCompute.bind(this);
 this.compute = this.compute.bind(this);
 this.clearFunc = this.clearFunc.bind(this);
 this.addFunc = this.addFunc.bind(this);
@@ -54,7 +52,19 @@ this.multFunc = this.multFunc.bind(this);
 this.upFunc = this.upFunc.bind(this);
 this.downFunc = this.downFunc.bind(this);
 
+this.doAdd = this.doAdd.bind(this);
+this.doSub = this.doSub.bind(this);
+this.doMult = this.doMult.bind(this);
+this.doDiv = this.doDiv.bind(this);
+
+document.querySelector(".up").classList.add('hidden');
+document.querySelector(".up").textContent = "";
+document.querySelector(".down").textContent = "";
+document.querySelector(".down").classList.add('hidden');
+
+/* ------------------------------------------------Calculator Input Functions */
 function concatNum() {
+  if (justComputed) document.querySelector(".result").style.fontSize = "80px";
   justComputed = false;
   if (document.querySelector(".result").offsetWidth > containerWidth) {
     let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
@@ -87,6 +97,8 @@ function switchFunc() {
 function clearFunc() {
   if (currOp != "") document.querySelector(currOp).classList.remove("clicked");
   currNum = "0";
+  currNum2 = "";
+  currNumBuffer = "0";
   number = "";
   currOp = "";
   hasOperation = false;
@@ -94,71 +106,38 @@ function clearFunc() {
   document.querySelector(".result").style.fontSize = "80px";
 }
 
+function pureCompute() {
+    if (hasOperation) {
+      if (currOp == ".add") {
+        doAdd();
+      }
+      if (currOp == ".subtract") {
+        doSub();
+      }
+      if (currOp == ".divide") {
+        doDiv();
+      }
+      if (currOp == ".multiply") {
+        doMult();
+      }
+    }
+}
+
 function compute() {
   if (hasOperation) {
     if (currOp == ".add") {
-      const ultimate = parseFloat(currNum2) + parseFloat(currNum);
-      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
-      document.querySelector(".result").textContent = ultimate;
-      while (document.querySelector(".result").offsetWidth > containerWidth) {
-        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
-        newSize = (parseInt(newSize) * 0.8) + "px";
-        console.log(newSize);
-        document.querySelector(".result").style.fontSize = newSize;
-      }
-      lastLog = currNum2 + " + " + currNum + " = " + ultimate;
+      doAdd();
     }
     if (currOp == ".subtract") {
-      const ultimate = parseFloat(currNum2) - parseFloat(currNum);
-      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
-      document.querySelector(".result").textContent = ultimate;
-      while (document.querySelector(".result").offsetWidth > containerWidth) {
-        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
-        newSize = (parseInt(newSize) * 0.8) + "px";
-        console.log(newSize);
-        document.querySelector(".result").style.fontSize = newSize;
-      }
-      lastLog = currNum2 + " - " + currNum + " = " + ultimate;
+      doSub();
     }
     if (currOp == ".divide") {
-      const ultimate = parseFloat(currNum2) / parseFloat(currNum);
-      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
-      document.querySelector(".result").textContent = ultimate;
-      while (document.querySelector(".result").offsetWidth > containerWidth) {
-        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
-        newSize = (parseInt(newSize) * 0.8) + "px";
-        console.log(newSize);
-        document.querySelector(".result").style.fontSize = newSize;
-      }
-      lastLog = currNum2 + " ÷ " + currNum + " = " + ultimate;
+      doDiv();
     }
     if (currOp == ".multiply") {
-      const ultimate = parseFloat(currNum2) * parseFloat(currNum);
-      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
-      document.querySelector(".result").textContent = ultimate;
-      while (document.querySelector(".result").offsetWidth > containerWidth) {
-        let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
-        newSize = (parseInt(newSize) * 0.8) + "px";
-        console.log(newSize);
-        document.querySelector(".result").style.fontSize = newSize;
-      }
-      lastLog = currNum2 + " × " + currNum + " = " + ultimate;
+      doMult();
     }
-
-    console.log(lastLog);
-
-    document.querySelector(currOp).classList.remove("clicked");
-    const newBuff = document.createElement('div');
-    newBuff.classList.add('buffer');
-    newBuff.classList.add("h" + timesLogged);
-    newBuff.textContent = lastLog;
-    currBottom = timesLogged;
-    timesLogged += 1;
-    if (timesLogged > 3) {
-      const toHide = timesLogged - 4;
-      document.querySelector(".h" + toHide).classList.add('inactive'); //find another way to select without numbers
-    }
-    document.querySelector(".answerBar").insertBefore(newBuff, document.querySelector(".result"));
+    addBuffer();
     justComputed = true;
   }
   else {
@@ -169,13 +148,46 @@ function compute() {
   currNum = "0";
   number = "";
   currOp = "";
-  hasOperation = false; //buggy, for some reason a call to this.clearFunc doesn't work
+  hasOperation = false;
+}
+
+function addBuffer() {
+  console.log(timesLogged);
+  if (timesLogged > 2) {
+    document.querySelector(".up").classList.remove('hidden');
+    document.querySelector(".up").textContent = "^";
+    up.addEventListener('click', this.upFunc);
+  }
+  for (let i = 0; i < timesLogged; i++) {
+    if (i >= timesLogged - 3) {
+      document.querySelector(".h" + i).classList.remove('inactive');
+    }
+    else {
+      document.querySelector(".h" + i).classList.add('inactive');
+    }
+  }
+  document.querySelector(currOp).classList.remove("clicked");
+  const newBuff = document.createElement('div');
+  newBuff.classList.add('buffer');
+  newBuff.classList.add("h" + timesLogged);
+  newBuff.textContent = lastLog;
+  currBottom = timesLogged;
+  timesLogged += 1;
+  if (timesLogged > 3) {
+    const toHide = timesLogged - 4;
+    document.querySelector(".h" + toHide).classList.add('inactive'); //find another way to select without numbers
+  }
+  document.querySelector(".answerBar").insertBefore(newBuff, document.querySelector(".result"));
+  while (newBuff.offsetHeight > bufferHeight) { //doesn't work yet
+    let newSize = window.getComputedStyle(newBuff.getPropertyValue('font-size')).replace("px", "");
+    newSize = (parseInt(newSize) * 0.8) + "px";
+    newBuff.style.fontSize = newSize;
+  }
 }
 
 function addFunc() {
   if (!hasOperation) {
     currOp = ".add";
-    document.querySelector(".add").classList.add("clicked");
     hasOperation = true;
     if (justComputed) {
       currNum2 = currNumBuffer;
@@ -185,12 +197,21 @@ function addFunc() {
     }
     currNum = "0";
   }
+  else {
+    pureCompute();
+    document.querySelector(currOp).classList.remove("clicked");
+    currNum2 = currNumBuffer;
+    currOp = ".add";
+    hasOperation = true;
+    currNum = "0";
+    addBuffer();
+  }
+  document.querySelector(".add").classList.add("clicked");
 }
 
 function subFunc() {
   if (!hasOperation) {
     currOp = ".subtract";
-    document.querySelector(".subtract").classList.add("clicked");
     hasOperation = true;
     if (justComputed) {
       currNum2 = currNumBuffer;
@@ -200,12 +221,21 @@ function subFunc() {
     }
     currNum = "0";
   }
+  else {
+    pureCompute();
+    document.querySelector(currOp).classList.remove("clicked");
+    currNum2 = currNumBuffer;
+    currOp = ".subtract";
+    hasOperation = true;
+    currNum = "0";
+    addBuffer();
+  }
+  document.querySelector(".subtract").classList.add("clicked");
 }
 
 function divFunc() {
   if (!hasOperation) {
     currOp = ".divide";
-    document.querySelector(".divide").classList.add("clicked");
     hasOperation = true;
     if (justComputed) {
       currNum2 = currNumBuffer;
@@ -215,12 +245,21 @@ function divFunc() {
     }
     currNum = "0";
   }
+  else {
+    pureCompute();
+    document.querySelector(currOp).classList.remove("clicked");
+    currNum2 = currNumBuffer;
+    currOp = ".divide";
+    hasOperation = true;
+    currNum = "0";
+    addBuffer();
+  }
+  document.querySelector(".divide").classList.add("clicked");
 }
 
 function multFunc() {
   if (!hasOperation) {
     currOp = ".multiply";
-    document.querySelector(".multiply").classList.add("clicked");
     hasOperation = true;
     if (justComputed) {
       currNum2 = currNumBuffer;
@@ -230,24 +269,106 @@ function multFunc() {
     }
     currNum = "0";
   }
+  else {
+    pureCompute();
+    document.querySelector(currOp).classList.remove("clicked");
+    currNum2 = currNumBuffer;
+    currOp = ".multiply";
+    hasOperation = true;
+    currNum = "0";
+    addBuffer();
+  }
+  document.querySelector(".multiply").classList.add("clicked");
 }
 
 function upFunc() {
+  document.querySelector(".down").classList.remove('hidden'); //also get rid of the rendering
+  document.querySelector(".down").textContent = "v";
+  down.addEventListener('click', this.downFunc);
   if (currBottom > 2) {
     document.querySelector(".h" + (currBottom)).classList.add('inactive');
     document.querySelector(".h" + (currBottom - 3)).classList.remove('inactive');
     currBottom = currBottom - 1;
-    console.log(currBottom);
+    if (currBottom == 2) { //broken
+      document.querySelector(".up").classList.add('hidden');
+      document.querySelector(".up").textContent = "";
+      up.removeEventListener('click', this.upFunc);
+    }
   }
 }
 
 function downFunc() {
+  document.querySelector(".up").classList.remove('hidden');
+  document.querySelector(".up").textContent = "^";
+  up.addEventListener('click', this.upFunc);
   if (timesLogged > 3 && currBottom < timesLogged - 1) {
     document.querySelector(".h" + (currBottom - 2)).classList.add('inactive');
     document.querySelector(".h" + (currBottom + 1)).classList.remove('inactive');
     currBottom = currBottom + 1;
+    if (currBottom == timesLogged - 1) {
+      document.querySelector(".down").classList.add('hidden');
+      document.querySelector(".down").textContent = "";
+      down.removeEventListener('click', this.downFunc);
+    }
   }
 }
+
+/* -------------------------------------------------------Calculate functions */
+
+function doAdd() {
+  const ultimate = parseFloat(currNum2) + parseFloat(currNum);
+  currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
+  console.log(ultimate);
+  document.querySelector(".result").textContent = ultimate;
+  while (document.querySelector(".result").offsetWidth > containerWidth) {
+    let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+    newSize = (parseInt(newSize) * 0.8) + "px";
+    console.log(newSize);
+    document.querySelector(".result").style.fontSize = newSize;
+  }
+  lastLog = currNum2 + " + " + currNum + " = " + ultimate;
+}
+
+function doSub() {
+  const ultimate = parseFloat(currNum2) - parseFloat(currNum);
+  currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
+  document.querySelector(".result").textContent = ultimate;
+  while (document.querySelector(".result").offsetWidth > containerWidth) {
+    let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+    newSize = (parseInt(newSize) * 0.8) + "px";
+    console.log(newSize);
+    document.querySelector(".result").style.fontSize = newSize;
+  }
+  lastLog = currNum2 + " - " + currNum + " = " + ultimate;
+}
+
+function doDiv() {
+  const ultimate = parseFloat(currNum2) / parseFloat(currNum);
+  currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
+  document.querySelector(".result").textContent = ultimate;
+  while (document.querySelector(".result").offsetWidth > containerWidth) {
+    let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+    newSize = (parseInt(newSize) * 0.8) + "px";
+    console.log(newSize);
+    document.querySelector(".result").style.fontSize = newSize;
+  }
+  lastLog = currNum2 + " ÷ " + currNum + " = " + ultimate;
+}
+
+function doMult() {
+  const ultimate = parseFloat(currNum2) * parseFloat(currNum);
+  currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
+  document.querySelector(".result").textContent = ultimate;
+  while (document.querySelector(".result").offsetWidth > containerWidth) {
+    let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
+    newSize = (parseInt(newSize) * 0.8) + "px";
+    console.log(newSize);
+    document.querySelector(".result").style.fontSize = newSize;
+  }
+  lastLog = currNum2 + " × " + currNum + " = " + ultimate;
+}
+
+/* -----------------------------------------------------------Event Listeners */
 
 nine.addEventListener('click', function() {number = "9";});
 nine.addEventListener('click', this.concatNum);
@@ -302,7 +423,3 @@ sub.addEventListener('click', this.subFunc);
 div.addEventListener('click', this.divFunc);
 
 mult.addEventListener('click', this.multFunc);
-
-up.addEventListener('click', this.upFunc);
-
-down.addEventListener('click', this.downFunc);
