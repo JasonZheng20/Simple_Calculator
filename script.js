@@ -2,7 +2,7 @@
 
 //bugs
 //5. refresh buffers may bug out on clear, may exceed space
-//6. sometimes excessively long buffers will cause overflow
+//if i do any thing and input new number, it might overflow or clear, since those reset the sizes
 
 /* ----------------------------------------------------------Global Variables */
 var currNum = "0";
@@ -64,7 +64,10 @@ document.querySelector(".down").classList.add('hidden');
 
 /* ------------------------------------------------Calculator Input Functions */
 function concatNum() {
-  if (justComputed) document.querySelector(".result").style.fontSize = "80px";
+  if (justComputed || hasOperation) {
+    document.querySelector(".result").style.fontSize = "80px";
+    //if buffer exceeds to box range then hide it
+  }
   justComputed = false;
   if (document.querySelector(".result").offsetWidth > containerWidth) {
     let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
@@ -78,7 +81,6 @@ function concatNum() {
     currNum += number;
   }
   document.querySelector(".result").textContent = currNum;
-  console.log(currNum);
 }
 
 function switchFunc() {
@@ -178,10 +180,14 @@ function addBuffer() {
     document.querySelector(".h" + toHide).classList.add('inactive'); //find another way to select without numbers
   }
   document.querySelector(".answerBar").insertBefore(newBuff, document.querySelector(".result"));
-  while (newBuff.offsetHeight > bufferHeight) { //doesn't work yet
-    let newSize = window.getComputedStyle(newBuff.getPropertyValue('font-size')).replace("px", "");
-    newSize = (parseInt(newSize) * 0.8) + "px";
-    newBuff.style.fontSize = newSize;
+  let newBuffHeight = newBuff.offsetHeight;
+  while (newBuffHeight > bufferHeight) { //doesn't work yet
+    const newBufferarg = document.querySelector(".h" + (timesLogged - 1));
+    console.log(newBufferarg);
+    newBuffHeight = window.getComputedStyle(newBufferarg).getPropertyValue('font-size');
+    newBuffHeight.replace("px", "");
+    newBuffHeight = (parseInt(newBuffHeight) * 0.8) + "px";
+    newBuff.style.fontSize = newBuffHeight;
   }
 }
 
@@ -408,6 +414,7 @@ dec.addEventListener('click', function() {
     number = "";
   }
   });
+  
 dec.addEventListener('click', this.concatNum);
 
 sign.addEventListener('click', this.switchFunc);
