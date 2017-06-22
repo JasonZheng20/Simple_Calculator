@@ -69,6 +69,7 @@ body {
   justify-content: center;
   align-items: center;
   font-size: 175%;
+  background-color: #44ff4b;
 }
 
 #specButton {
@@ -79,12 +80,8 @@ body {
   background-color: #2170ef !important;
 }
 
-#enter {
-  background-color: #44ff4b !important;
-}
-
-#enter:hover {
-  background-color: #29ad2e !important;
+.fatButton:hover {
+  background-color: #29ad2e;
 }
 
 #dark {
