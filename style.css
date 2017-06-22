@@ -1,0 +1,47 @@
+body {
+  margin: 0px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.answerBar {
+  height: 20vh;
+  width: 40vw;
+  background-color: #333333;
+}
+
+.row {
+  display: flex;
+  /*justify-content: center;*/
+  align-items: center;
+}
+
+.grid {
+  width: 40vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ededed;
+}
+
+#specButton {
+  background-color: #aacbff !important;
+}
+
+.button {
+  height: 7.5vw;
+  width: 10vw;
+  background-color: #ededed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 175%;
+
+}
+
+.fatButton {
+
+}
+
+.bottomRow {
+
+}
