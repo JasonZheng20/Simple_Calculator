@@ -7,6 +7,10 @@ var currOp = "";
 var hasOperation = false;
 
 var currNum2 = "";
+var justComputed = false;
+var currNumBuffer = "0";
+
+const containerWidth = document.querySelector(".button").offsetWidth * 2;
 
 const nine = document.querySelector(".nine");
 const eight = document.querySelector(".eight");
@@ -34,9 +38,12 @@ this.switchFunc = this.switchFunc.bind(this);
 this.compute = this.compute.bind(this);
 this.clearFunc = this.clearFunc.bind(this);
 this.addFunc = this.addFunc.bind(this);
+this.subFunc = this.subFunc.bind(this);
+this.divFunc = this.divFunc.bind(this);
+this.multFunc = this.multFunc.bind(this);
 
 function concatNum() {
-  const containerWidth = document.querySelector(".button").offsetWidth * 2;
+  justComputed = false;
   if (document.querySelector(".result").offsetWidth > containerWidth) {
     let newSize = window.getComputedStyle(document.querySelector(".result")).getPropertyValue('font-size').replace("px", "");
     newSize = (parseInt(newSize) * 0.8) + "px";
@@ -52,10 +59,17 @@ function concatNum() {
   console.log(currNum);
 }
 
-function switchFunc() {
-  const currentRes = parseFloat(currNum);
-  currNum = -currentRes;
-  document.querySelector(".result").textContent = currNum;
+function switchFunc() { //doesnt work when i have done a result already
+  if (!justComputed) {
+    const currentRes = parseFloat(currNum);
+    currNum = -currentRes;
+    document.querySelector(".result").textContent = currNum;
+  }
+  else {
+    const currentRes = parseFloat(currNumBuffer);
+    currNumBuffer = -currentRes;
+    document.querySelector(".result").textContent = currNumBuffer;
+  }
 }
 
 function clearFunc() {
@@ -65,6 +79,7 @@ function clearFunc() {
   currOp = "";
   hasOperation = false;
   document.querySelector(".result").textContent = currNum;
+  document.querySelector(".result").style.fontSize = "80px";
   //add functionality for history console
 }
 
@@ -72,17 +87,33 @@ function compute() {
   if (hasOperation) {
     if (currOp == ".add") {
       const ultimate = parseFloat(currNum2) + parseFloat(currNum);
+      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
+      document.querySelector(".result").textContent = ultimate;
+    } //IT DOESNT SHRINK IF I COMPUTE A FAT NUMBER WITH DECIMALS
+    if (currOp == ".subtract") {
+      const ultimate = parseFloat(currNum2) - parseFloat(currNum);
+      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
+      document.querySelector(".result").textContent = ultimate;
+    }
+    if (currOp == ".divide") {
+      const ultimate = parseFloat(currNum2) / parseFloat(currNum);
+      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
+      document.querySelector(".result").textContent = ultimate;
+    }
+    if (currOp == ".multiply") {
+      const ultimate = parseFloat(currNum2) * parseFloat(currNum);
+      currNumBuffer = ultimate; //need to make it so if next click is an operation do that operation instead of clear
       document.querySelector(".result").textContent = ultimate;
     }
     document.querySelector(currOp).classList.remove("clicked");
+    justComputed = true;
   }
   else {
     document.querySelector(".result").textContent = parseFloat(currNum);
   }
   currNum = "0";
   number = "";
-  currNum2 = "";
-  currOp = null;
+  currOp = "";
   hasOperation = false;
   //buggy, for some reason a call to this.clearFunc doesn't work
 }
@@ -92,7 +123,57 @@ function addFunc() {
     currOp = ".add";
     document.querySelector(".add").classList.add("clicked");
     hasOperation = true;
-    currNum2 = currNum;
+    if (justComputed) {
+      currNum2 = currNumBuffer;
+    }
+    else {
+      currNum2 = currNum;
+    }
+    currNum = "0";
+  }
+}
+
+function subFunc() {
+  if (!hasOperation) {
+    currOp = ".subtract";
+    document.querySelector(".subtract").classList.add("clicked");
+    hasOperation = true;
+    if (justComputed) {
+      currNum2 = currNumBuffer;
+    }
+    else {
+      currNum2 = currNum;
+    }
+    currNum = "0";
+  }
+}
+
+function divFunc() {
+  if (!hasOperation) {
+    currOp = ".divide";
+    document.querySelector(".divide").classList.add("clicked");
+    hasOperation = true;
+    if (justComputed) {
+      currNum2 = currNumBuffer;
+    }
+    else {
+      currNum2 = currNum;
+    }
+    currNum = "0";
+  }
+}
+
+function multFunc() {
+  if (!hasOperation) {
+    currOp = ".multiply";
+    document.querySelector(".multiply").classList.add("clicked");
+    hasOperation = true;
+    if (justComputed) {
+      currNum2 = currNumBuffer;
+    }
+    else {
+      currNum2 = currNum;
+    }
     currNum = "0";
   }
 }
@@ -144,3 +225,9 @@ equal.addEventListener('click', this.compute);
 clear.addEventListener('click', this.clearFunc);
 
 add.addEventListener('click', this.addFunc);
+
+sub.addEventListener('click', this.subFunc);
+
+div.addEventListener('click', this.divFunc);
+
+mult.addEventListener('click', this.multFunc);
